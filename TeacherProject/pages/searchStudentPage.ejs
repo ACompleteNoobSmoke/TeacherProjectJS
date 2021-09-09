@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Homepage</title>
+    <link rel = "stylesheet" href = "/searchStyle.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+</head>
+<body>
+
+    <div class = "wrapper">
+        <div class = "sidebar">
+            <h2>BASED HIGH</h2>
+            <ul>
+                <li><a href="/updateStudentList"><i class="fas fa-home"> Home</i></a></li>
+                <li><a href="/SearchStudentPage"><i class="fas fa-search"> Search</i></a></li>
+                <li><a href="/AddStudentPage"><i class="fas fa-user-plus"> Add Student</i></a></li>
+                <li><a href="#"><i class="fas fa-user-minus"> Remove Student</i></a></li>
+                <li><a href="/signout"><i class="fas fa-power-off"> Sign Out</i></a></li>
+            </ul>
+        </div>
+        <div class = "main-content">
+            <div class = "header">Welcome  <%=name %></div>
+            <div class = "info"></div>
+            <div class = "info-graphic" id="infoshow">
+            <div class="card">
+                <div class="card-header"
+              style="background-image: url(https://t4.ftcdn.net/jpg/03/79/31/57/360_F_379315711_9dYf0jyywapP9DEJrgd2H39pISP2SVDS.jpg)"
+                >
+                </div>
+                <div class="card-body">
+                    <h2 class="name"><%=firstname%></h2>
+                    <h2 class="name"><%=lastname%> </h2>
+                </div>
+            </div>
+            </div>
+            <div class ="report-table">
+                <table id="table" class="styled-table">
+                    <tr class = "table-header">
+                        <td>Code</td>
+                        <td>Name</td>
+                        <td>Credit</td>
+                        <td>Grade</td>
+                    </tr>
+                                            
+                        <% for (let i = 0; i < 4; i++) { %>
+                            <tr class="active-row">
+                                <td><%= grades.Code %></td>
+                                <td><%= grades.Name %></td>
+                                <td><%= grades.Credit %></td>
+                                <td><%= grades.Grade %></td>
+                            </tr>
+                        <%  } %>
+               </table>
+            </div>
+            <div class="wrap">
+                <div class="search">
+                    <form action = "/SearchDatabase" method = "POST">
+                   <input type="text" class="searchTerm" name="searchedName" placeholder="Please Enter Student ID Number">
+                   <button type="submit" class="searchButton">
+                     <i class="fa fa-search"></i>
+                  </button>
+                  </form>
+                </div>
+             </div>
+    
+</body>
+</html>

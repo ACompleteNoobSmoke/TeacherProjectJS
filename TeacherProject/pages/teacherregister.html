@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel = "stylesheet" href = "/RegisterStyle.css">
+    <title>Registration</title>
+</head>
+<body>
+    <header>
+        <div class = "wrapper">
+            <div class = "logo">
+                <img src="/TeacherLogo.jpg" alt="Main Picture">
+            </div>
+            <ul class = "nav-area">
+                <li><a href = "/">Home</a></li>
+                <li><a href = "/signin">Login</a></li>
+            </ul>
+        </div>
+        </header>
+      
+    <div class = "login-box">
+        <h1>Registration</h1>
+        <form action = "/verifyTeacher" method = "POST"> 
+        <div class = "textbox">
+            <i class = "fa fa-user" aria-hidden="true"></i>
+            <input type = "text" placeholder="First Name" name = "teacher[firstName]" value = "" required>
+        </div>
+
+        <div class = "textbox">
+            <i class = "fa fa-user" aria-hidden="true"></i>
+            <input type = "text" placeholder="Last Name" name = "teacher[lastName]" value = "" required>
+        </div>
+
+        <div class = "textbox">
+            <i class = "fa fa-user" aria-hidden="true"></i>
+            <input type = "text" placeholder="Username" name = "teacher[userName]" value = "" required>
+        </div>
+
+        <div class = "textbox">
+            <i class="fa fa-lock" aria-hidden="true"></i>
+            <input type = "text" placeholder="Password" name = "teacher[passWord]" value = "" required>
+        </div>
+
+        <label>
+            <input type="radio" name="teacher[Gender]" value="Male" required>
+            Male
+          </label>
+          <label>
+            <input type="radio" name="teacher[Gender]" value="Female">
+            Female
+          </label>
+    
+       <button class = "btn" type = "submit" name = "" value = "Register">Register</button>
+      </form>       
+    </div>
+   
+    
+</body>
+</html>
