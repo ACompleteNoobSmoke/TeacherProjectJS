@@ -8,13 +8,11 @@ var mysql = require('mysql');
 const { resolve } = require('url');
 var jsdom = require("jsdom");
 var JSDOM = jsdom.JSDOM;
-//const bootstrap = require('bootstrap')
 const port = 3000;
 var alert = require('alert');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'pages'));
 
-var document = new JSDOM(`<div class = "info-graphic" id="infoshow">`);
 
 var teacherObject = {
     FirstName: undefined,
@@ -36,20 +34,20 @@ var studentObject = {
 var studentLists = {};
 
 var reportObject = {
-    Code: undefined,
-    Name: undefined,
-    Credit: undefined,
-    Grade: undefined
+    Grade1: ' ',
+    Grade2: ' ',
+    Grade3: ' ',
+    Grade4: ' '
 };
 
-var testReport = {
-    Code : 'CS 255',
-    Name: 'Data Structure',
-    Credit: '3.0',
-    Grade: 'A'
+var reportObject2 = {
+    ClassCode: ' ',
+    ClassName: ' ',
+    Credit: ' ',
+    Grade: ' '
 };
 
-var reportsArray = {};
+var reportsArray = [reportObject2, reportObject2, reportObject2, reportObject2];
 
 var classCodes = ['CS 255', 'MATH 101', 'PSY 322', 'BIO 413', 'SCI 420'];
 var classNames = ['Data Structure', 'Intro To Algebra', 'Intermediate Psychology', 'Advanced Biology', 'Sciences Of Gas & Elements'];
@@ -129,6 +127,7 @@ app.get("/updateStudentList", function(req, res){
     if(typeof teacherObject.UserName !== 'undefined'){
         studentObject.FirstName = '';
         studentObject.LastName = '';
+        reportsArray = newBlankArrayObject();
         getAllStudents();
         return res.redirect('/TeacherHomePage');
     }
@@ -149,6 +148,9 @@ app.get("/TeacherHomePage", function(req, res){
 //Enter Add Student Page For Teachers
 app.get("/AddStudentPage", function(req, res){
     if(typeof teacherObject.UserName !== 'undefined'){
+        studentObject.FirstName = '';
+        studentObject.LastName = '';
+        reportsArray = newBlankArrayObject();
         return res.render("addingStudent", {
             name: genderTitle(teacherObject) + teacherObject.LastName
         });
@@ -159,9 +161,12 @@ app.get("/AddStudentPage", function(req, res){
 //
 app.post("/SearchDatabase", function(req, res){
     var s = req.body.searchedName;
-    getStudentObjectByID(s).then(function(student){
+    var t = teacherObject.UserName
+    getStudentByTeachernID(s, t).then(function(student){
         if(typeof student !== 'undefined'){
+            reportsArray = [];
             insertToStudentObject(student)
+            getStudentGradesByID(student.IDNumber)
         }
         res.redirect("/SearchStudentPage");
     });
@@ -187,13 +192,9 @@ app.post("/addStudentToDB", function(req, res){
 //Enter Searching Page
 app.get("/SearchStudentPage", function(req, res){
     if(typeof teacherObject.UserName !== 'undefined'){
-        if(studentObject !== 'undefined'){
-        //    var show = req.body.infoshow;
-        //    show = 'visible';
-        }
         return res.render("searchStudentPage", {
             name: genderTitle(teacherObject) + teacherObject.LastName,
-            grades: testReport,
+            grades: reportsArray,
             firstname: studentObject.FirstName,
             lastname: studentObject.LastName
         });
@@ -238,7 +239,41 @@ function insertToStudentObject(foundStudent){
     studentObject.SchoolYear = foundStudent.SchoolYear;
 }
 
+function insertToReport(grade, index){
+    reportObject2 = newBlankObject();
+    reportObject2.ClassCode = classCodes[index];
+    reportObject2.ClassName = classNames[index];
+    reportObject2.Credit = classCredits[index]
+    reportObject2.Grade = grade;
+    return reportObject2;
+}
 
+function insertToReportArray(grades){
+    var obj1 = insertToReport(grades.Grade1, 0);
+    var obj2 = insertToReport(grades.Grade2, 1);
+    var obj3 = insertToReport(grades.Grade3, 2);
+    var obj4 = insertToReport(grades.Grade4, 3);
+    reportsArray.push(obj1);
+    reportsArray.push(obj2);
+    reportsArray.push(obj3);
+    reportsArray.push(obj4);
+}
+
+function newBlankObject(){
+    var newObject = {
+        ClassCode: ' ',
+        ClassName: ' ',
+        Credit: ' ',
+        Grade: ' '
+    };
+    return newObject;
+}
+
+function newBlankArrayObject(){
+    var blank = newBlankObject();
+    var blankReport = [blank, blank, blank, blank];
+    return blankReport;
+}
 
 function getAllStudents(){
     getStudentAllTeacher().then(function(results){
@@ -278,28 +313,18 @@ function getCharacter() {
     return characters.charAt(Math.floor(Math.random() * charactersLength));
 }
 
-function setClassGrade(index){
+function setClassGrade(){
     var rep = reportObject;
-    rep.Code = classCodes[index];
-    rep.Name = classNames[index];
-    rep.Credit = classCredits[index];
-    rep.Grade = getCharacter();
+    rep.Grade1 = getCharacter();
+    rep.Grade2 = getCharacter();
+    rep.Grade3 = getCharacter();
+    rep.Grade4 = getCharacter();
     return rep;
 }
 
-function setStudentReportCard(){
-    var reportCards = []
-    for(var i = 0; i < 4; i++){
-        reportCards = setClassGrade(i);
-    }
-    return reportCards;
-}
-
 function saveRecord(idNumber){
-    for(var i = 0; i < 4; i++){
-        var reportCard = setClassGrade(i);
-        enterStudentGrades(idNumber, reportCard);
-    }
+    var reportCard = setClassGrade();
+    enterStudentGrades(idNumber, reportCard);
 }
 
 
@@ -371,9 +396,7 @@ function getStudentByTeachernID(idString){
         var sql = "Select * From StudentInfo Where TeacherUsername = '" + teacherObject.UserName + "' AND IDNumber = '" + idString + "';";
         con.query(sql, function (err, result) {
         if (err) throw err;
-        if(typeof result[0] === 'undefined') resolve(undefined);
         console.log("Selecting Student Table Using Teacher UserName");
-        console.log(result[0].FirstName);
         resolve(result[0]);
         });
     });
@@ -424,21 +447,30 @@ function enterStudentInfo(idString, studentInfo){
 
 //Enter student grades into the database
 function enterStudentGrades(idNumber, reportGrades){
-    var sql = "INSERT INTO StudentGrades (StudentIDNumber, ClassCode, ClassName, Credit, Grade)" +
-    " VALUES ('" + idNumber + "', '" + reportGrades.Code + "', '" + reportGrades.Name + "', '" + 
-    reportGrades.Credit + "', '" + reportGrades.Grade + "');";
+    var sql = "INSERT INTO StudentGrades (StudentIDNumber, Grade1, Grade2, Grade3, Grade4)" +
+    " VALUES ('" + idNumber + "', '" + reportGrades.Grade1 + "', '" + reportGrades.Grade2 + "', '" + 
+    reportGrades.Grade3 + "', '" + reportGrades.Grade4 + "');";
     con.query(sql, function (err, result) {
     if (err) throw err;
         console.log("1 record inserted");
     });
 }
 
+//Get Student Grades By ID
+    function getStudentGradesByID(idString){
+        var sql = "Select * From StudentGrades Where StudentIDNumber = '" + idString + "';";
+        con.query(sql, function (err, result) {
+        if (err) throw err;
+        if(typeof result !== 'undefined') insertToReportArray(result[0]);
+        console.log("Searching Student Grade Table");
+        });
+    }
+
 //Get Student By ID
 function getStudentObjectByID(idString){
     return new Promise((resolve, reject) => {
         var sql = "Select * From StudentInfo Where IDNumber = '" + idString + "';";
         con.query(sql, function (err, result) {
-        //console.log(result[0]);
         var student = result[0];
         if (err) throw err;
         if(typeof result[0] === 'undefined') 
@@ -446,22 +478,8 @@ function getStudentObjectByID(idString){
         resolve(student);
         });
     });
-
-//Get Student Grades By ID
-    function getStudentGradesByID(idString){
-        return new Promise((resolve, reject) => {
-            var sql = "Select * From StudentInfo Where IDNumber = '" + idString + "';";
-            con.query(sql, function (err, result) {
-            //console.log(result[0]);
-            var studentExists = true;
-            if (err) throw err;
-            if(typeof result[0] === 'undefined') studentExists = false;
-            console.log("Searching Student Table");
-            resolve(studentExists);
-            });
-        });
-    }
 }
+
 
     
     
