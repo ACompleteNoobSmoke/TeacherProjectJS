@@ -24,10 +24,10 @@ drop table StudentInfo;
 
 create table StudentGrades(
 StudentIDNumber varchar(7),
-ClassCode varchar(10),
-ClassName varchar(255),
-Credit varchar(4),
-Grade varchar(2)
+Grade1 varchar(2),
+Grade2 varchar(2),
+Grade3 varchar(2),
+Grade4 varchar(2)
 );
 
 select * from StudentGrades;
