@@ -158,19 +158,26 @@ app.get("/AddStudentPage", function(req, res){
     res.redirect("/");  
 });
 
-//
+//Search database for student object and their associated grades
 app.post("/SearchDatabase", function(req, res){
-    var s = req.body.searchedName;
-    var t = teacherObject.UserName
-    getStudentByTeachernID(s, t).then(function(student){
-        if(typeof student !== 'undefined'){
-            reportsArray = [];
-            insertToStudentObject(student)
-            getStudentGradesByID(student.IDNumber)
-        }
-        res.redirect("/SearchStudentPage");
-    });
-
+    if(typeof teacherObject.UserName !== 'undefined'){
+        var s = req.body.searchedName;
+        var t = teacherObject.UserName
+        getStudentByTeachernID(s, t).then(function(student){
+            if(typeof student !== 'undefined'){
+                reportsArray = [];
+                insertToStudentObject(student)
+                getStudentGradesByID(student.IDNumber)
+            }else{
+                reportsArray = newBlankArrayObject();
+                studentObject.FirstName = ' ';
+                studentObject.LastName = ' ';
+                alert("Student Could Not Be Found!");
+            }
+        });
+        return res.redirect("/SearchStudentPage");
+    }
+    res.redirect("/");
 })
 
 //Used to verifying the information from register
@@ -201,6 +208,38 @@ app.get("/SearchStudentPage", function(req, res){
     }
     res.redirect("/");   
 })
+
+//Remove Student Page For Teachers
+app.get("/RemoveStudentPage", function(req, res){
+    if(typeof teacherObject.UserName !== 'undefined'){
+        studentObject.FirstName = '';
+        studentObject.LastName = '';
+        reportsArray = newBlankArrayObject();
+        return res.render("removeStudent", {
+            name: genderTitle(teacherObject) + teacherObject.LastName
+        });
+    }
+    res.redirect("/");  
+});
+
+//Used to verifying the information from register
+app.post("/removeStudentFromDB", function(req, res){
+    if(typeof teacherObject.UserName !== 'undefined'){
+        var studentID = req.body.student.IDNumber;
+        removeStudentByID(studentID).then(function(removed){
+            if(removed){
+                removeStudentGradesByID(studentID);
+                alert('Student Was Removed');
+            }else{
+                alert('Student Could Not Be Found');
+            }
+        });
+        return res.redirect("/RemoveStudentPage");
+    }
+    res.redirect("/");
+});
+
+
 
 
 
@@ -466,19 +505,29 @@ function enterStudentGrades(idNumber, reportGrades){
         });
     }
 
-//Get Student By ID
-function getStudentObjectByID(idString){
+//Remove Student By ID
+function removeStudentByID(idString){
     return new Promise((resolve, reject) => {
-        var sql = "Select * From StudentInfo Where IDNumber = '" + idString + "';";
+        var sql = "Delete From StudentInfo Where IDNumber = '" + idString + "';";
         con.query(sql, function (err, result) {
-        var student = result[0];
+        console.log(result);
+        var studentRemoved = true;
         if (err) throw err;
-        if(typeof result[0] === 'undefined') 
-        console.log("Searching Student Table");
-        resolve(student);
+        if(result.affectedRows == 0) studentRemoved = false;
+        console.log("Delete Student Table");
+        resolve(studentRemoved);
         });
     });
-}
+}   
+
+//Remove Student By ID
+function removeStudentGradesByID(idString){
+        var sql = "Delete From StudentGrades Where StudentIDNumber = '" + idString + "';";
+        con.query(sql, function (err, result) {
+        if (err) throw err;
+    });
+} 
+
 
 
     
