@@ -47,10 +47,10 @@
                                             
                         <% for (let i = 0; i < 4; i++) { %>
                             <tr class="active-row">
-                                <td><%= grades.Code %></td>
-                                <td><%= grades.Name %></td>
-                                <td><%= grades.Credit %></td>
-                                <td><%= grades.Grade %></td>
+                                <td><%= grades[i].ClassCode %></td>
+                                <td><%= grades[i].ClassName %></td>
+                                <td><%= grades[i].Credit %></td>
+                                <td><%= grades[i].Grade %></td>
                             </tr>
                         <%  } %>
                </table>
