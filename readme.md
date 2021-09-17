@@ -6,6 +6,7 @@ Database - MySQL
 MS Visual Studio Code - HTML, CSS, EJS, JavaScript, NodeJS
 
 Features: 
+
 Login/Registration Functionality,
 CRUD Functionality,
 Connected To Database,
