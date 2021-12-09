@@ -8,7 +8,7 @@ var mysql = require('mysql');
 const { resolve } = require('url');
 var jsdom = require("jsdom");
 var JSDOM = jsdom.JSDOM;
-const port = 3000;
+const port = 3006;
 var alert = require('alert');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'pages'));
@@ -371,7 +371,7 @@ function saveRecord(idNumber){
 
 //Create connection for database
 var con = mysql.createConnection({
-    host: "localhost",
+    host: "host.docker.internal",
     user: "root",
     port: 3306,
     password: "codingroot1!",
